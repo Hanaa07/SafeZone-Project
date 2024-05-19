@@ -128,9 +128,6 @@ const saveCoordAndZone = async () => {
 };
 
 const styles = {
-  buttonContainer: {
-    marginBottom: 25,
-  },
   button: {
     fontSize: 20,
   },

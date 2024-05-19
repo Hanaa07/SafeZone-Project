@@ -8,11 +8,11 @@ const Login = ({navigation}) => {
   const [password, setPassword] = React.useState("");
 
   const handleLogin = () => {
-    navigation.replace("NavigationFrame"); 
+    navigation.navigate('Main', { screen: 'NaviagtionFrame'}); 
   };
 
   const handleSignup = () => {
-    navigation.replace("Register");
+    navigation.navigate('Auth', { screen: 'Register' });
   };
 
   return (
