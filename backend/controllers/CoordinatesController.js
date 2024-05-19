@@ -3,12 +3,20 @@ const Coordinates = require('../models/Coordinates');
 // Controller for creating a new coordinate
 exports.createCoordinate = async (req, res) => {
     try {
-        const { longitude, latitude, order } = req.body;
-        const coordinate = new Coordinates({ longitude, latitude, order });
-        await coordinate.save();
-        res.status(201).json({ message: 'Coordinate created successfully', coordinate });
+        const markerData = req.body;
+        const coordinates = [];
+
+        // Iterate over marker data and create coordinates
+        for (const marker of markerData) {
+            const { longitude, latitude, order } = marker;
+            const coordinate = new Coordinates({ longitude, latitude, order });
+            await coordinate.save();
+            coordinates.push(coordinate);
+        }
+
+        res.status(201).json({ message: 'Coordinates created successfully', coordinates });
     } catch (error) {
-        console.error('Error creating coordinate:', error);
+        console.error('Error creating coordinates from markers:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

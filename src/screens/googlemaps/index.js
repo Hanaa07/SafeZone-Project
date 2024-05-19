@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Button } from 'react-native';
 import markerIcon from './markerIcon.png';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, mapKit } from 'react-native-maps';
 const fetch = require('node-fetch');
 
 const LATITUDE = 31.63416;
@@ -46,7 +46,7 @@ const GoogleMapsScreen = () => {
 
       // Post marker data to your database
       try {
-        const apiUrl = 'http://192.168.1.105:3000/api/coordinates';
+        const apiUrl = 'http://192.168.1.101:3000/api/coordinates';
 
         const response = await fetch(apiUrl, {
         method: 'POST',
@@ -74,7 +74,7 @@ const GoogleMapsScreen = () => {
     <View style={{ flex: 1 }}>
       <MapView
         style={{ flex: 1 }}
-        provider={PROVIDER_GOOGLE}
+        provider={mapKit}
         initialRegion={region}
         onPress={(e) => onMapPress(e)}
       >
