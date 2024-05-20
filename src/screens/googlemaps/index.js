@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { View, Button, StyleSheet } from 'react-native';
-import markerIcon from './markerIcon.png';
-import MapView, { Marker, Polyline, mapKit } from 'react-native-maps';
-const fetch = require('node-fetch');
+import React, { useEffect, useState } from 'react';
+import { View, Button, StyleSheet, Alert } from 'react-native';
+import MapView, { Marker, Polygon, Polyline, mapKit } from 'react-native-maps';
+import fetch from 'node-fetch';
 
 const LATITUDE = 31.63416;
 const LONGITUDE = -7.99994;
@@ -10,28 +9,64 @@ const LATITUDE_DELTA = 0.1;
 const LONGITUDE_DELTA = 0.1;
 
 let id = 0;
+
 const GoogleMapsScreen = () => {
+  
+
   const [region, setRegion] = useState({
     latitude: LATITUDE,
     longitude: LONGITUDE,
     latitudeDelta: LATITUDE_DELTA,
     longitudeDelta: LONGITUDE_DELTA,
   });
- 
+
   const [markers, setMarkers] = useState([]);
   const [polylineCoords, setPolylineCoords] = useState([]);
+  const [polygonCoords, setPolygonCoords] = useState([]);
+  
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const response = await fetch("http://192.168.203.204:3000/api/Allzones");
+        if (!response.ok) {
+          console.error('Failed to fetch zones from database:', response.status, response.statusText);
+          return;
+        }
+        const data = await response.json();
+        setPolygonCoords(data);
+      } catch (error) {
+        console.error('Error fetching zones:', error.message);
+      }
+    };
 
-  // setting markers
+    fetchZones();
+  }, []);
+
+  
+  const deleteLastMarker = () => {
+    setMarkers((prevMarkers) => {
+      const newMarkers = [...prevMarkers];
+      newMarkers.pop(); // Remove the last marker
+      return newMarkers;
+    });
+    setPolylineCoords((prevCoords) => {
+      const newCoords = [...prevCoords];
+      newCoords.pop(); // Remove the last coordinate
+      return newCoords;
+    });
+  };
+
   const onMapPress = (e) => {
+    setPolylineCoords([]);
     const newMarker = {
       coordinate: e.nativeEvent.coordinate,
       key: id++,
     };
     setMarkers([...markers, newMarker]);
     setPolylineCoords([...polylineCoords, e.nativeEvent.coordinate]);
-    console.log('New Marker Added:', newMarker);
+    
   };
-  // drag marker 
+
   const onMarkerDragEnd = (e, markerKey) => {
     const newCoordinate = e.nativeEvent.coordinate;
     setMarkers((prevMarkers) =>
@@ -46,53 +81,72 @@ const GoogleMapsScreen = () => {
         markers[index]?.key === markerKey ? newCoordinate : coord
       )
     );
+    setPolylineCoords([]);
   };
 
-  // save coordinates
-  const saveCoord = async () => {
-    if (markers.length > 0) {
-      const markerData = markers.map((marker, index) => {
-        const data = {
-          longitude: marker.coordinate.longitude,
-          latitude: marker.coordinate.latitude,
-          order: index,
-        };
-        console.log('Marker Data:', data);
-        return data;
-      });
-      
-         // Close the polyline by adding the first marker's coordinate at the end
-         const closedPolylineCoords = [
-          ...polylineCoords,
-          polylineCoords[0],
-        ];
-        setPolylineCoords(closedPolylineCoords);
+  const saveCoordAndZone = async () => {
 
-      // Post marker data to your database
-      try {
-        const apiUrl = 'http://192.168.1.101:3000/api/coordinates';
+    Alert.alert(
+      "Save Zone",
+      "Are you sure you want to Save this Zone ",
+      [
+          {
+              text :"No", onPress : ()=> {
+                setMarkers([]);
+                setPolylineCoords([]);
+              }
+          },
 
-        const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(markerData),
-      });
+          {
+              text :"Yes", onPress : async()=> {
+                if (markers.length > 0) {
+                  const markerData = markers.map((marker, index) => ({
+                    longitude: marker.coordinate.longitude,
+                    latitude: marker.coordinate.latitude,
+                    order: index,
+                  }));
+            
+                  console.log('Markers to be saved:');
+                  markerData.forEach((marker, index) => {
+                    console.log(`Marker ${index + 1}:`, marker);
+                  });
+            
+                  const closedPolylineCoords = [...polylineCoords, polylineCoords[0]];
+                  setPolylineCoords(closedPolylineCoords);
+            
+                  try {
+                    console.log({ coordinates: markerData });
+                    const response = await fetch("http://192.168.203.204:3000/api/zones", {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ coordinates: markerData }),
+                    });
+            
+                    if (response.ok) {
+                      const data = await response.json();
+                      setMarkers([]);
+                      setPolylineCoords([]);
+                      setPolygonCoords((prevCoords) => [...prevCoords, markerData]);
+                      console.log("asdancakc" ,polylineCoords);
+                    } else {
+                      console.error('Failed to save data to database');
+                    }
+                  } catch (error) {
+                    console.error('Error saving data to database:', error);
+                  }
+                } else {
+                  console.log('No markers to save.');
+                }
+              }
+          },
+          {defaultIndex : 1}
+      ]
+  )
 
-
-        if (response.ok) {
-          console.log('Markers saved to database successfully.');
-        } else {
-          console.error('Failed to save markers to database.');
-        }
-      } catch (error) {
-        console.error('Error saving markers to database:', error);
-      }
-    } else {
-      console.log('No markers to save.');
-    }
   };
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -100,7 +154,7 @@ const GoogleMapsScreen = () => {
         style={{ flex: 1 }}
         provider={mapKit}
         initialRegion={region}
-        onPress={(e) => onMapPress(e)}
+        onPress={onMapPress}
       >
         {markers.map((marker) => (
           <Marker
@@ -108,13 +162,25 @@ const GoogleMapsScreen = () => {
             coordinate={marker.coordinate}
             pinColor='red'
             draggable
-            onDragEnd={(e)=> onMarkerDragEnd(e,marker.key)}
+            onDragEnd={(e) => onMarkerDragEnd(e, marker.key)}
           />
         ))}
+
         <Polyline coordinates={polylineCoords} strokeColor="#FF0000" strokeWidth={2} />
+        
+        {polygonCoords.map((coordinates, index) => (
+          <Polygon
+            coordinates={coordinates}
+            key={index}
+            fillColor="rgba(220, 53, 69, 0.5)"
+            strokeColor="rgba(0,0,0,0.5)"
+            strokeWidth={2}
+          />
+        ))}
       </MapView>
       <View style={styles.buttonContainer}>
-        <Button title="Save" onPress={saveCoord} style={styles.button} />
+        <Button title="Delete Last Marker" onPress={deleteLastMarker} style={styles.button} />
+        <Button title="Save" onPress={saveCoordAndZone} style={styles.button} />
       </View>
     </View>
   );
@@ -122,7 +188,8 @@ const GoogleMapsScreen = () => {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    marginBottom: 25,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   button: {
     fontSize: 20,
