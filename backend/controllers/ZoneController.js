@@ -1,6 +1,54 @@
-// Import necessary modules
-const Coordinates = require('../models/Coordinates');
 const Zone = require('../models/Zone');
+const Coordinates = require('../models/Coordinates');
+
+// Get all zones
+// Get all zones
+exports.getAllZones = async (req, res) => {
+    try {
+        const zones = await Zone.find().exec();
+
+        const zonesWithCoordinates = await Promise.all(zones.map(async (zone) => {
+            const coordinatesDetails = await Coordinates.find({
+                _id: { $in: zone.coordinates }
+            }).exec();
+
+            return (
+               coordinatesDetails.map(coord => ({
+                    longitude: coord.longitude,
+                    latitude: coord.latitude,
+                    order: coord.order
+                }))
+            );
+        }));
+
+        res.status(200).json(zonesWithCoordinates);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Server error' });
+    }
+};
+// Get a single zone by ID
+
+exports.getZoneById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Check if the ID is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid Zone ID' });
+      }
+  
+      const zone = await Zone.findById(id);
+      if (!zone) {
+        return res.status(404).json({ message: 'Zone not found' });
+      }
+  
+      res.status(200).json(zone);
+    } catch (error) {
+      console.error('Error fetching zone:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  };
 
 // Define controller function for creating a new zone with coordinates
 exports.createZone = async (req, res) => {
@@ -49,5 +97,38 @@ exports.createZone = async (req, res) => {
         // Handle any errors
         console.error(err);
         res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+// Update a zone by ID
+exports.updateZone = async (req, res) => {
+    const { coordinates } = req.body;
+
+    if (coordinates && !Array.isArray(coordinates)) {
+        return res.status(400).json({ message: "Coordinates must be an array of ObjectId references" });
+    }
+
+    try {
+        const updatedZone = await Zone.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!updatedZone) return res.status(404).json({ message: "Zone not found" });
+        res.status(200).json(updatedZone);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// Delete a zone by ID
+exports.deleteZone = async (req, res) => {
+    try {
+        const zone = await Zone.findByIdAndDelete(req.params.id);
+        if (!zone) return res.status(404).json({ message: "Zone not found" });
+        res.status(200).json({ message: "Zone deleted" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };
