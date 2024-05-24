@@ -8,7 +8,6 @@ import { useFonts } from "expo-font";
 import store from "./store";
 import AuthNavigator from "./navigation/AuthNavigator";
 
-
 const App = () => {
   
   const [fontsLoaded, error] = useFonts({
