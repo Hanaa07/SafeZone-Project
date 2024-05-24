@@ -13,7 +13,7 @@ exports.getAllZones = async (req, res) => {
             }).exec();
 
             return (
-               coordinatesDetails.map(coord => ({
+                coordinatesDetails.map(coord => ({
                     longitude: coord.longitude,
                     latitude: coord.latitude,
                     order: coord.order
@@ -24,37 +24,67 @@ exports.getAllZones = async (req, res) => {
         res.status(200).json(zonesWithCoordinates);
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: 'Server error' });
-    }
+        res.status(500).send({ message: 'Server error' });
+    }
+};
+
+exports.getAllTypeZones = async (req, res) => {
+    try {
+        const zones = await Zone.find().select('typeZone -_id');
+
+        const types = zones.map(zone => zone.typeZone);
+
+        res.status(200).json(types);
+    } catch (error) {
+        console.error('Error fetching typeZone values:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.getAllZoneIds = async (req, res) => {
+    try {
+        // Query to find all zones and select only the _id field
+        const zones = await Zone.find().select('_id');
+
+        // Map the zones to extract the _id values
+        const ids = zones.map(zone => zone._id);
+
+        // Respond with the array of _id values
+        res.status(200).json(ids);
+    } catch (error) {
+        // Log any errors and send a server error response
+        console.error('Error fetching zone IDs:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
 };
 // Get a single zone by ID
 
 exports.getZoneById = async (req, res) => {
     try {
-      const { id } = req.params;
-      
-      // Check if the ID is a valid ObjectId
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid Zone ID' });
-      }
-  
-      const zone = await Zone.findById(id);
-      if (!zone) {
-        return res.status(404).json({ message: 'Zone not found' });
-      }
-  
-      res.status(200).json(zone);
+        const { id } = req.params;
+
+        // Check if the ID is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid Zone ID' });
+        }
+
+        const zone = await Zone.findById(id);
+        if (!zone) {
+            return res.status(404).json({ message: 'Zone not found' });
+        }
+
+        res.status(200).json(zone);
     } catch (error) {
-      console.error('Error fetching zone:', error);
-      res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Error fetching zone:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-  };
+};
 
 // Define controller function for creating a new zone with coordinates
 exports.createZone = async (req, res) => {
     try {
         // Extract coordinates array from the request body
-        const { coordinates } = req.body;
+        const { coordinates, typeZone } = req.body;
 
         // Validate that coordinates is an array
         if (!Array.isArray(coordinates)) {
@@ -86,6 +116,7 @@ exports.createZone = async (req, res) => {
         // Create a new Zone object with the array of Coordonnees object IDs
         const newZone = new Zone({
             coordinates: newCoordinatesArray,
+            typeZone
         });
 
         // Save the new zone to the database
@@ -122,13 +153,18 @@ exports.updateZone = async (req, res) => {
     }
 };
 
-// Delete a zone by ID
-exports.deleteZone = async (req, res) => {
+exports.deleteZoneById = async (req, res) => {
     try {
-        const zone = await Zone.findByIdAndDelete(req.params.id);
-        if (!zone) return res.status(404).json({ message: "Zone not found" });
-        res.status(200).json({ message: "Zone deleted" });
+        const { id } = req.params;
+
+        const zone = await Zone.findByIdAndDelete({ _id: id });
+        if (!zone) {
+            return res.status(404).json({ message: 'Zone not found' });
+        }
+
+        res.status(200).json({ message: 'Zone deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error deleting zone:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
