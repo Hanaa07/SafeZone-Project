@@ -10,8 +10,6 @@ This article introduces our user-friendly app for tracking danger zones in the u
 - [Frontend](#frontend)
 - [Backend](#backend)
 - [Getting Started](#getting-started)
-- [Folder Structure](#folder-structure)
-- [Video Demonstration](#video-demonstration)
 - [Contributing](#contributing)
 
 ## Overview
@@ -174,12 +172,6 @@ Consequently, the generated program will account for these constraints and prefe
 ![planning](img/planningNew.png)
 Figure 3: A proposed scheduling program learning for a student
 
-## Video Demonstration
-
-Click the link below to watch a demonstration video:
-
-[Watch Video](https://github.com/OUSSAMAOUHA/SmartBendEd_Plateform/assets/96892805/52db9341-e7e6-49ed-9984-da43071858ea)
-
 ## Contributing
 
 We welcome contributions from everyone, and we appreciate your help to make this project even better! If you would like to contribute, please follow these guidelines:
@@ -189,6 +181,6 @@ We welcome contributions from everyone, and we appreciate your help to make this
 - ABOU KHAIR Ouassima ([GitHub](https://github.com/OuassimaAboukhair))
 - EL YANBOUAI Hanaâ ([GitHub](https://github.com/Hanaa07))
 - ELBARRAQ Yousra ([GitHub](https://github.com/yousraeb))
-- HADEQ Hamza ([GitHub](https://github.com/))
+- HADEQ Hamza ([GitHub](https://github.com/ST3ERLING))
 - OUKHOUYY Chaymae ([GitHub](https://github.com/chaymaeoukhouyy))
 - Mohamed Lachgar ([Researchgate](https://www.researchgate.net/profile/Mohamed-Lachgar))
