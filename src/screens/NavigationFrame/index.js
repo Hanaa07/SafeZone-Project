@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { FontFamily, Color, FontSize } from "../../../GlobalStyles";
-import GoogleMapsScreen from '../Googlemaps';
+import GoogleMapsScreen from '../../../Pages/GoogleMapsScreen';
+
 
 const NavigationFrame = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.securcity}>SecurCity</Text>
+      {/* <Text style={styles.securcity}>SecurCity</Text> */}
       <View style={styles.contentWrapper}>
         <GoogleMapsScreen />
       </View>
