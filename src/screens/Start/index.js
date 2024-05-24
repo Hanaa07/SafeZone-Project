@@ -17,7 +17,7 @@ const Start = ({navigation}) => {
   };
 
   const handleSignup = () => {
-    navigation.navigate('Auth', { screen: 'Register' }); 
+    navigation.navigate('Auth', { screen: 'Danger' }); 
 
   };
   return (
