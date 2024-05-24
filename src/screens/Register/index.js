@@ -14,9 +14,25 @@ const Register = ({ navigation }) => {
     navigation.navigate('Auth', { screen: 'Login' });
   };
 
-  const handleSignup = () => {
+  const handleSignup = async() => {
     if (isChecked) {
-      navigation.navigate('Main', { screen: 'NavigationFrame' });
+
+      const response = await fetch("http://10.10.3.103:3000/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name , email, password }),
+
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return rejectWithValue(errorData);
+    }
+
+    const user = await response.json();
+    navigation.navigate('Auth', { screen: 'Login' });
     } else {
       alert("You must agree to the terms and conditions to register.");
     }

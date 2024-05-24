@@ -1,100 +1,166 @@
-import * as React from "react";
-import { StyleSheet, View, Text } from "react-native";
-import { Border, FontSize, Color, FontFamily } from "../../../GlobalStyles";
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Dashboard = () => {
+const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?`;
+
+const states = [
+  { name: 'Erruption', icon: 'whatshot', devices: 4, color: "#b3261e" },
+  { name: 'Flood', icon: 'water', devices: 6, color: '#4161b2' },
+  { name: 'Tornado', icon: 'tornado', devices: 4, color: '#7d7f82' },
+  { name: 'Fire', icon: 'local-fire-department', devices: 6, color: '#f67734' },
+  { name: 'Hazard', icon: 'warning', devices: 6, color: '#ffc00c' },
+  { name: 'Attackers', icon: 'security', devices: 4, color: '#e151ca' },
+];
+
+export default function Dashboard() {
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchWeather();
+    const intervalId = setInterval(fetchWeather, 20000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const fetchWeather = async () => {
+    try {
+      const savedLocation = await AsyncStorage.getItem('currentLocation');
+      if (savedLocation) {
+        const { latitude, longitude } = JSON.parse(savedLocation);
+        const response = await axios.get(`${WEATHER_API_URL}lat=${latitude}&lon=${longitude}&appid=a7a5e76f081927c3f4f5febc192e9ce3`);
+        setWeather(response.data);
+      } else {
+        setError('Location data not found. Please enable location services.');
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching weather:', error);
+      setError('Error fetching weather data. Please try again later.');
+      setLoading(false);
+    }
+  };
+
   return (
-    <View style={styles.dashboard}>
-        <Text style={styles.securcity}>SecurCity</Text>
-      <Text style={styles.dangerInYour}>Stats in your area</Text>
-      <View style={styles.statsContainer}>
-        <View style={[styles.statBox, styles.dangerBox]}>
-          <Text style={styles.statNumber}>5</Text>
-          <Text style={styles.statLabel}>Danger Zones</Text>
-        </View>
-        <View style={[styles.statBox, styles.safetyBox]}>
-          <Text style={styles.statNumber}>90%</Text>
-          <Text style={styles.statLabel}>Safety Rate</Text>
-        </View>
-      </View>
-      <Text style={styles.dangerInYourCountry}>Stats in your country</Text>
-      <View style={styles.statsContainer}>
-        <View style={[styles.statBox, styles.submittedBox]}>
-          <Text style={styles.statNumber}>15</Text>
-          <Text style={styles.statLabel}>Submitted Zones</Text>
-        </View>
-        <View style={[styles.statBox, styles.reportedBox]}>
-          <Text style={styles.statNumber}>2</Text>
-          <Text style={styles.statLabel}>Reported Incidents</Text>
-        </View>
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.headerText}>
+          Welcome to the Dashboard , 
+        </Text>
+      <ImageBackground
+        source={require('../../../assets/soleil.jpeg')}
+        style={[styles.header]} 
+      >
+        {weather && (
+          <View style={styles.weatherContainer}>
+            <Text style={styles.weatherLocation}>{weather.name}</Text>
+            <Text style={styles.weatherTemp}>{`${(weather.main.temp - 273.15).toFixed(1)}°`}</Text>
+            <Text style={styles.weatherDescription}>{weather.weather[0].description}</Text>
+            <Text style={styles.weatherRange}>{`H:${(weather.main.temp_max - 273.15).toFixed(1)}° L:${(weather.main.temp_min - 273.15).toFixed(1)}°`}</Text>
+          </View>
+        )}
+      </ImageBackground>
+
+      <ScrollView contentContainerStyle={styles.statesContainer}>
+        {states.map((state, index) => (
+          <TouchableOpacity key={index} style={[styles.stateCard]}>
+            <View style={styles.stateInfo}>
+              <MaterialIcons name={state.icon} size={40} style={[ { color: state.color }]}/>
+              <Text style={styles.stateName}>{state.name}</Text>
+            </View>
+            <Text style={[styles.deviceCount, { color: state.color }]}>{state.devices}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  dashboard: {
+  container: {
     flex: 1,
-    paddingTop: 40,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  
-  securcity: {
-    fontSize: FontSize.size_13xl,
-    color: Color.colorMediumaquamarine,
-    fontFamily: FontFamily.balooThambiMedium,
-    textAlign: 'center'
+  header: {
+    height: 280,
+    width: '98%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderRadius: 20, 
+    marginTop: 10,
+  } ,
+  headerText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'black',
+    marginTop: 70,
+    marginLeft: 20, 
+    alignSelf: 'flex-start',
+    marginBottom:12, 
+    fontFamily: "BalooThambi2-ExtraBold",
   },
-  dangerInYour: {
-    fontSize: FontSize.size_7xl,
-    color: Color.labelColorLightPrimary,
-    fontFamily: FontFamily.balooThambiMedium,
-    marginBottom: 20,
+  weatherContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+    padding: 30,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: 'center',
   },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
+  weatherLocation: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  statBox: {
-    width: "48%",
-    height: 210,
-    borderRadius: Border.br_lg,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10,
+  weatherTemp: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  dangerBox: {
-    backgroundColor: "#ffa8a7",
-  },
-  safetyBox: {
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
-  },
-  submittedBox: {
-    backgroundColor: "rgba(255, 190, 157, 0.64)",
-  },
-  reportedBox: {
-    backgroundColor: "rgba(255, 199, 40, 0.22)",
-  },
-  statNumber: {
-    fontSize: FontSize.size_33xl,
-    color: Color.labelColorLightPrimary,
-    fontFamily: FontFamily.balooThambiMedium,
-  },
-  statLabel: {
-    fontSize: FontSize.size_7xl,
-    color: Color.labelColorLightPrimary,
-    fontFamily: FontFamily.balooThambiMedium,
-    textAlign: "center",
+  weatherDescription: {
+    fontSize: 18,
+    color: '#fff',
     marginTop: 10,
   },
-  dangerInYourCountry: {
-    fontSize: FontSize.size_7xl,
-    color: Color.labelColorLightPrimary,
-    fontFamily: FontFamily.balooThambiMedium,
-    marginBottom: 20,
+  weatherRange: {
+    fontSize: 18,
+    color: '#fff',
+    marginTop: 10,
+  },
+  statesContainer: {
+    paddingVertical: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stateCard: {
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+    elevation: 2,
+    borderWidth: 1, 
+    borderColor: '#ccc',  
+    width: '90%',
+  },
+  stateInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stateName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontFamily: "BalooThambi2-ExtraBold",
+  },
+  deviceCount: {
+    fontSize: 35,
+    color: '#666',
   },
 });
-
-export default Dashboard;
