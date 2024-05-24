@@ -2,16 +2,23 @@ import * as React from "react";
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { FontSize, Color, Border, FontFamily, Padding } from "../../../GlobalStyles";
+import { useDispatch } from "react-redux";
+import { login } from "../../../auth/authSlice";
 
 const Login = ({navigation}) => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-
+  const dispatch = useDispatch();
   const handleLogin = () => {
-    navigation.navigate('Main', { screen: 'NaviagtionFrame'}); 
+    if(email && password){
+      dispatch(login({email,password}));
+    }else{
+        console.log("Fields are empty..");
+    }
   };
 
   const handleSignup = () => {
+    
     navigation.navigate('Auth', { screen: 'Register' });
   };
 
