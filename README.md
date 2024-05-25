@@ -10,6 +10,7 @@ This article introduces our user-friendly app for tracking danger zones in the u
 - [Frontend](#frontend)
 - [Backend](#backend)
 - [Getting Started](#getting-started)
+- [Video Demonstration](#Video-Demonstration)
 - [Contributing](#contributing)
 
 ## Overview
@@ -171,6 +172,11 @@ Consequently, the generated program will account for these constraints and prefe
 
 ![planning](img/planningNew.png)
 Figure 3: A proposed scheduling program learning for a student
+
+# Video Demonstration
+
+https://github.com/Hanaa07/SafeZone-Project/assets/SecurCity_demo.mp4
+
 
 ## Contributing
 
