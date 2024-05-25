@@ -163,19 +163,23 @@ Now, your full-stack project should be up and running locally. If you encounter 
 
 ## Illustrative Example
 
-We aim to present a scheduling solution based on a student’s learning preferences and constraints. This particular student possesses specific learning space requirements, necessitates access to specific infrastructure and equipment, and expresses a preference for a hybrid learning mode.
+We aim to present a safety app to track the users and allow them to mark the danger zones for others to see and avoid, the first screens they will be presented with are the get started and authentication screens.
 
-![admin](img/screenAdmin.png)
-Figure 2: Interface (Admin) for different managements
+![WhatsApp Image 2024-05-24 à 07 46 14_55ca886a](https://github.com/Hanaa07/SafeZone-Project/assets/96198085/18193d09-75a6-4835-9744-746db1133b32)
 
-Consequently, the generated program will account for these constraints and preferences, offering a diverse and suitable plan for their academic journey.
+Figure 2: Authentication Page
 
-![planning](img/planningNew.png)
-Figure 3: A proposed scheduling program learning for a student
+After registering or logging into the app, the users will be presented with the map screen where they can mark the danger zones in their area allowing other users to avoid them.
+
+![WhatsApp Image 2024-05-24 à 07 46 14_229b9633](https://github.com/Hanaa07/SafeZone-Project/assets/96198085/9538a51f-1cb8-4f38-8dad-590f708a23c6)
+
+Figure 3: Map Page
+
 
 # Video Demonstration
+Click the link below to watch a demonstration video:
 
-https://github.com/Hanaa07/SafeZone-Project/assets/SecurCity_demo.mp4
+[https://github.com/Hanaa07/SafeZone-Project/assets/SecurCity_demo.mp4](https://github.com/Hanaa07/SafeZone-Project/blob/main/assets/SecurCity_demo.mp4)
 
 
 ## Contributing
